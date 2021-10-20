@@ -30,7 +30,7 @@ LIBS = -L$(BINDIR) -lkuma
 CXX=g++
 
 CXXFLAGS = -g -std=c++14 -pipe -fPIC -Wall -Wextra -pedantic
-LDFLAGS = -lpthread -ldl -lssl -lcrypt -Wl,-rpath,.
+LDFLAGS = -lpthread -ldl -lssl -lcrypt -lpaho-mqttpp3 -lpaho-mqtt3a -Wl,-rpath,.
 
 SRCS =  \
     LoopPool.cpp\
@@ -40,7 +40,8 @@ SRCS =  \
     HttpClient.cpp\
     UdpClient.cpp\
     WsClient.cpp\
-    main.cpp
+    demo.cpp
+#    main.cpp
     
 OBJS = $(patsubst %.c,$(OBJDIR)/%.o,$(patsubst %.cpp,$(OBJDIR)/%.o,$(patsubst %.cxx,$(OBJDIR)/%.o,$(SRCS))))
 #OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)

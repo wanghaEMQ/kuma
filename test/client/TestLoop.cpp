@@ -118,10 +118,13 @@ void TestLoop::startTest_i(const std::string& addr_url, const std::string& bind_
         }
         udp_client->startSend(host, port);
     } else if(strcmp(proto, "http") == 0 || strcmp(proto, "https") == 0) {
+		// Doing http request TODO
+		printf("Do http request...\n");
         long conn_id = server_->getConnId();
         HttpClient* http_client = new HttpClient(this, conn_id);
         addObject(conn_id, http_client);
         http_client->startRequest(addr_url);
+		printf("...OK\n");
     } else if(strcmp(proto, "ws") == 0 || strcmp(proto, "wss") == 0) {
         long conn_id = server_->getConnId();
         WsClient* ws_client = new WsClient(this, conn_id);
