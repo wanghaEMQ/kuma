@@ -43,7 +43,7 @@ std::queue<mqtt::message> msgQueue;
 
 using namespace kuma;
 
-#define THREAD_COUNT    10
+#define THREAD_COUNT    2
 static bool g_exit = false;
 bool g_test_http2 = true;
 std::string g_proxy_url;
@@ -87,19 +87,9 @@ void HandlerRoutine(int sig)
 #endif
 
 static const std::string g_usage =
-"   client [option] tcp://127.0.0.1:52328\n"
 "   client [option] http://google.com/\n"
-"   client [option] ws://www.websocket.org/\n"
-"   client [option] udp//127.0.0.1:52328\n"
-"   client [option] mcast//224.0.0.1:52328\n\n"
-"   -b host:port    local host and port to be bound to\n"
-"   -c number       concurrent clients\n"
-"   -t ms           send interval\n"
 "   -v              print version\n"
-"   --bw            bandwidth (bps)\n"
 "   --http2         test http2\n"
-"   --proxy         test proxy setting\n"
-"   --proxy-cred    proxy credential \"[domain\\]username[:password]\"\n"
 ;
 
 std::vector<std::thread> event_threads;
@@ -128,17 +118,6 @@ void split_str(std::string& str, std::string& delim, std::vector<std::string>& v
 
 /////////////////////////////////////////////////////////////////////////////
 
-// Example of a simple, in-memory persistence class.
-//
-// This is an extremely silly example, because if you want to use
-// persistence, you actually need it to be out of process so that if the
-// client crashes and restarts, the persistence data still exists.
-//
-// This is just here to show how the persistence API callbacks work. It maps
-// well to key/value stores, like Redis, but only if it's on the local host,
-// as it wouldn't make sense to persist data over the network, since that's
-// what the MQTT client it trying to do.
-//
 class sample_mem_persistence : virtual public mqtt::iclient_persistence
 {
 	// Whether the store is open
@@ -153,20 +132,20 @@ public:
 
 	// "Open" the store
 	void open(const std::string& clientId, const std::string& serverURI) override {
-		std::cout << "[Opening persistence store for '" << clientId
-			<< "' at '" << serverURI << "']" << std::endl;
+//		std::cout << "[Opening persistence store for '" << clientId
+//			<< "' at '" << serverURI << "']" << std::endl;
 		open_ = true;
 	}
 
 	// Close the persistent store that was previously opened.
 	void close() override {
-		std::cout << "[Closing persistence store.]" << std::endl;
+//		std::cout << "[Closing persistence store.]" << std::endl;
 		open_ = false;
 	}
 
 	// Clears persistence, so that it no longer contains any persisted data.
 	void clear() override {
-		std::cout << "[Clearing persistence store.]" << std::endl;
+//		std::cout << "[Clearing persistence store.]" << std::endl;
 		store_.clear();
 	}
 
@@ -185,8 +164,8 @@ public:
 
 	// Puts the specified data into the persistent store.
 	void put(const std::string& key, const std::vector<mqtt::string_view>& bufs) override {
-		std::cout << "[Persisting data with key '"
-			<< key << "']" << std::endl;
+//		std::cout << "[Persisting data with key '"
+//			<< key << "']" << std::endl;
 		std::string str;
 		for (const auto& b : bufs)
 			str.append(b.data(), b.size());	// += b.str();
@@ -195,25 +174,25 @@ public:
 
 	// Gets the specified data out of the persistent store.
 	std::string get(const std::string& key) const override {
-		std::cout << "[Searching persistence for key '"
-			<< key << "']" << std::endl;
+//		std::cout << "[Searching persistence for key '"
+//			<< key << "']" << std::endl;
 		auto p = store_.find(key);
 		if (p == store_.end())
 			throw mqtt::persistence_exception();
-		std::cout << "[Found persistence data for key '"
-			<< key << "']" << std::endl;
+//		std::cout << "[Found persistence data for key '"
+//			<< key << "']" << std::endl;
 
 		return p->second;
 	}
 
 	// Remove the data for the specified key.
 	void remove(const std::string &key) override {
-		std::cout << "[Persistence removing key '" << key << "']" << std::endl;
+//		std::cout << "[Persistence removing key '" << key << "']" << std::endl;
 		auto p = store_.find(key);
 		if (p == store_.end())
 			throw mqtt::persistence_exception();
 		store_.erase(p);
-		std::cout << "[Persistence key removed '" << key << "']" << std::endl;
+//		std::cout << "[Persistence key removed '" << key << "']" << std::endl;
 	}
 };
 
@@ -312,7 +291,7 @@ main()
 	std::cout << "MQTT initialzing..." << std::endl;
 	sample_mem_persistence persist;
 	std::string clientID = SERVER_PREFIX + PATH + ID;
-	std::cout << "Clientid is" << clientID << std::endl;
+	std::cout << "Clientid is [" << clientID << "]" << std::endl;
 	mqtt::client client(SERVER_ADDRESS, clientID, &persist);
 
 	user_callback cb;
@@ -350,12 +329,6 @@ main()
     loop_pool.init(THREAD_COUNT, main_loop.getPollType());
 
 	cb.set_loop_pool(&loop_pool);
-/*    
-    loop_pool.startTest(addr, bind_addr, concurrent);
-    main_loop.loop();
-    printf("stop loops...\n");
-    loop_pool.stop();
-*/
 	std::string input;
 
 	try {
