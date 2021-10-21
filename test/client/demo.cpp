@@ -38,6 +38,8 @@ std::string GET_ADDRESS = { "http://localhost:18084/demo/rpc?a=1" };
 /* MsgQueueThread parameter defined here */
 
 std::queue<mqtt::message> msgQueue;
+std::mutex mqCvMtx;
+std::condition_variable mqCv;
 
 /* KUMA (for Http2) parameter defined here */
 
@@ -247,6 +249,8 @@ class user_callback : public virtual mqtt::callback
 
 		mqtt::message responseMsg(responseTopic, responsePayload);
 		msgQueue.push(responseMsg);
+		std::unique_lock<std::mutex> lck(mqCvMtx);
+		mqCv.notify_one();
 
 //		std::string bind_addr;
 //		loop_pool->startTest(url, bind_addr, 1);
@@ -276,9 +280,12 @@ void test(mqtt::client& client) {
 
 void mqThreadMain(mqtt::client& client)
 {
-	while (!g_exit) {
-		if (msgQueue.empty()) {
-			continue;
+	std::unique_lock<std::mutex> lck(mqCvMtx);
+	while (1) {
+		mqCv.wait(lck, []{return (!msgQueue.empty() || g_exit);});
+		if (g_exit) {
+			std::cout << "mqThread exit." << std::endl;
+			return;
 		}
 		client.publish(msgQueue.front());
 		msgQueue.pop();
@@ -354,6 +361,7 @@ main()
 		std::cin >> input;
 		if (strcmp(input.data(), "c") == 0) {
 			g_exit = true;
+			mqCv.notify_all();
         	main_loop.stop();
 			break;
 		} else if (strcmp(input.data(), "g") == 0) {
