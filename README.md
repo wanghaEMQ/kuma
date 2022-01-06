@@ -12,7 +12,7 @@ It's a demo for converting mqtt to http2.
 
 ```
 $ cd /path/to/the/kuma
-$ cd src
+$ python ./bld/mac/build_mac.py
 $ make
 ```
 
@@ -21,7 +21,7 @@ to the path system can find.
 
 ```
 $ cd /path/to/the/kuma
-$ export LD_LIBRARY_PATH=./bin/linux/:$LD_LIBRARY_PATH
+$ export LD_LIBRARY_PATH=./bin/mac/:$LD_LIBRARY_PATH
 ```
 
 ### Build demo
@@ -36,7 +36,7 @@ $ make
 
 ```
 $ cd /path/to/the/kuma
-$ ./bin/linux/client
+$ ./bin/mac/client
 ```
 
 Input *c* would stop the client.
@@ -51,7 +51,7 @@ Input *test* would send a mqtt request.
 
 ```
 $ cd ./third_party/libkev
-$ python bld/linux/build_linux.py
+$ python bld/mac/build_mac.py
 ```
 
 2. Run export command in every shell session.
